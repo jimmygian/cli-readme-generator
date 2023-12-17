@@ -15,7 +15,7 @@ const githubLicenses = [
     'The Unlicense',
     'Eclipse Public License 2.0',
     'GNU Lesser General Public License v3.0'
-  ];
+];
 
 
 
@@ -85,18 +85,32 @@ const questions = [
 
 // function to write README file
 function writeToFile(fileName, data) {
-
+    fs.writeFile(`${fileName}.md`, generateMarkdown(data), 'utf8', (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        console.log(`${fileName}.md has been generated successfully.`);
+    });
 }
 
 // function to initialize program
 function init() {
     inquirer
-    .prompt(questions)
-    .then((answers) => {
-      // Use user feedback for... whatever!!
-      console.log(answers);
-      console.log(generateMarkdown(answers));
-    })
+        .prompt(questions)
+        .then((answers) => {
+            // Use user feedback for... whatever!!
+            console.log(answers);
+            console.log(generateMarkdown(answers));
+            const projectTitle = answers.project_name;
+
+            // Convert to camel case without spaces
+            const titleRule = /[^a-zA-Z0-9]+(.)/g;
+            const camelCaseTitle = projectTitle
+                .toLowerCase()
+                .replace(titleRule, (_, char) => char.toUpperCase());
+            writeToFile(camelCaseTitle, answers);
+        })
     // .catch((error) => {
     //   if (error.isTtyError) {
     //     // Prompt couldn't be rendered in the current environment
