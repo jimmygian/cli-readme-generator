@@ -37,10 +37,23 @@ const questions = [
         message: "What's your project name?"
     },
     {
+        type: 'input',
+        name: 'project_desc',
+        message: "Short project decription:"
+    },
+    {
         type: 'list',
         name: 'licence',
         message: "Prefered licence type?",
         choices: [...githubLicenses],
+    },
+    {
+        type: 'input',
+        name: 'dep_command',
+        message: "What command should be run to run dependencies?",
+        default() {
+            return "npm install"
+        }
     },
     {
         type: 'input',
@@ -82,6 +95,7 @@ function init() {
     .then((answers) => {
       // Use user feedback for... whatever!!
       console.log(answers);
+      console.log(generateMarkdown(answers));
     })
     // .catch((error) => {
     //   if (error.isTtyError) {
