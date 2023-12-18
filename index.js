@@ -1,25 +1,28 @@
-
 const fs = require("fs");
 const path = require('path');
 const inquirer = require("inquirer");
-const githubLicensesList = require('./utils/gitLicences.js');
+// Custom Modules
+const githubLicensesList = require('./utils/gitLicences');
 const generateMarkdown = require("./utils/generateMarkdown");
+const helper = require('./utils/helper');
 
 
-// Project Licences
+
+// Store github Licence names
 const githubLicenses = githubLicensesList.map(license => license.licenceName);
-
 
 // Get the absolute path of the current working directory
 const currentWorkingDir = path.resolve();
 
-// Count of Checking if the normalized path is absolute and valid
-let errorCount = 0;
+
+
+
 
 // array of questions for user
 const questions = [
+    
+    // DIRECTORY (in which readme.md will be saved)
     {
-        // DIRECTORY (in which readme.md will be saved)
         type: 'input',
         name: 'dir',
         message: 'Where should your readme file be saved?',
@@ -28,29 +31,30 @@ const questions = [
         },
         validate(userPath) {
             // Normalize the path to handle platform-specific differences
-            const absPath = getAbsolutePath(userPath);
+            const absPath = helper.getAbsolutePath(userPath);
 
             if (absPath === null) {
                 return `Please enter a valid absolute/relative directory.`;
             } else if (path.isAbsolute(absPath) && path.parse(absPath).root !== absPath) {
                 return true;
             } else {
-                errorCount++;
                 return `Please enter a valid absolute/relative directory.`;
             }
         }
     },
+    // GITHUB USERNAME
     {
         type: 'input',
         name: 'github_username',
         message: "What's your GitHub username?",
         validate(input) {
-            if (isGitHubUsername(input.trim())) {
+            if (helper.isGitHubUsername(input.trim())) {
                 return true;
             }
             return "Please provide a correct github username."
         },
     },
+    // EMAIL
     {
         type: 'input',
         name: 'email',
@@ -61,12 +65,13 @@ const questions = [
             if (trimmedInput === '') {
                 // If the trimmed input is empty, allow the user to proceed
                 return true;
-            } else if (isValidEmail(trimmedInput)) {
+            } else if (helper.isValidEmail(trimmedInput)) {
                 return true;
             }
             return "Please provide a correct email or leave it blank.";
         }
     },
+    // PROJECT TITLE
     {
         type: 'input',
         name: 'project_name',
@@ -81,6 +86,7 @@ const questions = [
             return "Please provide a correct project title.";
         }
     },
+    // SHORT DESCRIPTION
     {
         type: 'input',
         name: 'project_desc',
@@ -95,12 +101,14 @@ const questions = [
             return "Please provide a short description to proceed.";
         }
     },
+    // LICENCE TYPE
     {
         type: 'list',
         name: 'licence',
         message: "Prefered licence type?",
         choices: [...githubLicenses],
     },
+    // COMMANDS (for testing and installing dependences)
     {
         type: 'input',
         name: 'dep_command',
@@ -117,14 +125,16 @@ const questions = [
             return "npm test"
         }
     },
+    // USAGE
     {
         type: 'input',
         name: 'usage',
-        message: "Usage:",
+        message: "Project usage:",
         default() {
-            return "Run 'npm install' and then 'node index.js'."
+            return "Clone project, run 'npm install' and then 'node index.js'."
         }
     },
+    // COLLAB and CONTRIBUTIONS
     {
         type: 'input',
         name: 'collab',
@@ -136,6 +146,11 @@ const questions = [
         message: "Contributions:"
     },
 ];
+
+
+
+// ** FUNCTIONS **
+
 
 // function to write README file
 function writeToFile(filePath, data) {
@@ -153,6 +168,10 @@ function writeToFile(filePath, data) {
     });
 }
 
+
+
+// --------- INIT ----------
+
 // function to initialize program
 function init() {
     inquirer
@@ -165,57 +184,26 @@ function init() {
                 .toLowerCase()
                 .replace(titleRule, (_, char) => char.toUpperCase());
 
-            const absDir = getAbsolutePath(answers.dir);
+            const absDir = helper.getAbsolutePath(answers.dir);
             const constructedPath = path.normalize(`${absDir}/${camelCaseTitle}.md`)
             
 
             writeToFile(constructedPath, answers);
         })
-    // .catch((error) => {
-    //   if (error.isTtyError) {
-    //     // Prompt couldn't be rendered in the current environment
-    //   } else {
-    //     // Something else went wrong
-    //   }
-    // }); 
-}
-
-
-function isGitHubUsername(input) {
-    // GitHub username pattern: Only alphanumeric characters and hyphens allowed
-    const githubUsernamePattern = /^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,38}$/;
-
-    return githubUsernamePattern.test(input);
-}
-
-function isValidEmail(input) {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(input);
-}
-
-function getAbsolutePath(userPath) {
-    // Check if the user provided an absolute path directly
-    if (path.isAbsolute(userPath)) {
-      try {
-        // Check if the absolute path exists
-        fs.accessSync(userPath, fs.constants.R_OK);
-        return userPath; // Return the absolute path if it's valid and exists
-      } catch (error) {
-        return null; // Return null if the path is invalid or does not exist
+    .catch((error) => {
+      if (error.isTtyError) {
+        // Prompt couldn't be rendered in the current environment
+        console.error(error);
+    } else {
+        // Something else went wrong
+        console.error(error);
       }
-    }
-  
-    // Convert the relative path to an absolute path
-    const absolutePath = path.resolve(process.cwd(), userPath);
-  
-    try {
-      // Check if the absolute path exists
-      fs.accessSync(absolutePath, fs.constants.R_OK);
-      return absolutePath; // Return the absolute path if it's valid and exists
-    } catch (error) {
-      return null; // Return null if the path is invalid or does not exist
-    }
-  }
+    }); 
+}
 
 // function call to initialize program
 init();
+
+// --------- INIT ----------
+
+
