@@ -1,8 +1,15 @@
+const githubLicensesList = require('./gitLicences.js');
+
 // function to generate markdown for README
 function generateMarkdown(data) {
+  // User selected license
+  const selectedLicence = data.licence;
+  // Find the corresponding license object
+  const selectedLicenseObject = githubLicensesList.find(license => license.licenceName === selectedLicence);
+
   return `# ${data.project_name.trim()}
 
-  ![License](https://img.shields.io/badge/license-${data.licence.trim()}-brightgreen)
+  ${selectedLicenseObject.markdownText}
   
   ## Description
   
@@ -49,7 +56,7 @@ function generateMarkdown(data) {
 
   ## License
   
-  This project is licensed under the [${data.licence.trim()}](LICENSE) license.
+  This project is licensed under the [${selectedLicenseObject.licenceName}](LICENSE) license.
   
 
   ## Questions
@@ -61,6 +68,7 @@ function generateMarkdown(data) {
 
   `;
 }
+
 
 
 

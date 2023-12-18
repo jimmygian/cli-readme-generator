@@ -1,21 +1,14 @@
+
 const fs = require("fs");
 const path = require('path');
 const inquirer = require("inquirer");
+const githubLicensesList = require('./utils/gitLicences.js');
 const generateMarkdown = require("./utils/generateMarkdown");
 
+
 // Project Licences
-const githubLicenses = [
-    'MIT License',
-    'GNU General Public License v3.0',
-    'Apache License 2.0',
-    'BSD 2-Clause "Simplified" License',
-    'BSD 3-Clause "New" or "Revised" License',
-    'Creative Commons Zero v1.0 Universal (CC0)',
-    'Mozilla Public License 2.0',
-    'The Unlicense',
-    'Eclipse Public License 2.0',
-    'GNU Lesser General Public License v3.0'
-];
+const githubLicenses = githubLicensesList.map(license => license.licenceName);
+
 
 // Get the absolute path of the current working directory
 const currentWorkingDir = path.resolve();
@@ -156,7 +149,7 @@ function writeToFile(filePath, data) {
         // Extract the last part of the path
         const filename = path.basename(filePath);
 
-        console.log(`${filename}.md has been generated successfully.`);
+        console.log(`${filename} has been generated successfully.`);
     });
 }
 
